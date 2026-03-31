@@ -1,111 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Lowtide — Signing you in...</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #030e1c;
-      color: #caf0f8;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .logo { font-size: 11px; font-weight: 800; letter-spacing: 0.2em; color: #94a3b8; text-transform: uppercase; }
-    .msg { font-size: 15px; color: #64748b; }
-    .spinner {
-      width: 32px; height: 32px;
-      border: 3px solid rgba(56,189,248,0.15);
-      border-top-color: #38bdf8;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .success { color: #10b981; font-size: 15px; }
-    .error { color: #ef4444; font-size: 13px; max-width: 300px; text-align: center; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lowtide – Signing In</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #030e1c; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif;
+    display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { text-align: center; }
+  .wordmark { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #64748b;
+    text-transform: uppercase; margin-bottom: 24px; }
+  .spinner { width: 32px; height: 32px; border: 2px solid rgba(56,189,248,0.15);
+    border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .msg { font-size: 13px; color: #94a3b8; }
+  .success { color: #38bdf8; font-weight: 600; }
+  .error { color: #ef4444; }
+</style>
 </head>
 <body>
-  <div class="logo">Lowtide</div>
+<div class="card">
+  <div class="wordmark">Lowtide</div>
   <div class="spinner" id="spinner"></div>
   <div class="msg" id="msg">Completing sign in...</div>
+</div>
+<script>
+  const EXTENSION_ID = 'fgkbfgjgdlnepjjepejabhkijcejojnf';
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = 'https://lnejnktkjspamwgkhzjl.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxuZWpua3RranNwYW13Z2toempsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODU3MTAsImV4cCI6MjA4ODk2MTcxMH0.xOvkrjbdCEaIYbBNpfd3mhJSrD5WB-aDDW93jAEPx2s';
-    const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  function showSuccess(email) {
+    document.getElementById('spinner').style.display = 'none';
+    const m = document.getElementById('msg');
+    m.className = 'msg success';
+    m.textContent = email ? '✓ Signed in as ' + email : '✓ Signed in successfully';
+    setTimeout(() => window.close(), 2000);
+  }
 
-    async function handleCallback() {
-      const { data, error } = await sb.auth.getSession();
+  function showError(reason) {
+    document.getElementById('spinner').style.display = 'none';
+    const m = document.getElementById('msg');
+    m.className = 'msg error';
+    m.textContent = reason || 'Sign-in failed. Please try again.';
+  }
 
-      if (error || !data.session) {
-        document.getElementById('spinner').style.display = 'none';
-        document.getElementById('msg').className = 'error';
-        document.getElementById('msg').textContent = 'Sign in failed. Please close this tab and try again.';
-        return;
-      }
+  // Parse access_token directly from URL hash — no API call needed
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const access_token = params.get('access_token');
 
-      const session = data.session;
-      const token = session.access_token;
-      const user = session.user;
+  if (!access_token) {
+    showError('No token received. Please try signing in again.');
+  } else {
+    // Decode JWT payload to get email without an API call
+    let email = null;
+    try {
+      const payload = JSON.parse(atob(access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      email = payload.email || payload.user_metadata?.email || null;
+    } catch (e) {}
 
-      // Send token to extension
-      if (typeof chrome !== 'undefined' && chrome.runtime) {
-        // Try all known extension IDs — update this when you have your Chrome Web Store ID
-        const EXTENSION_IDS = ['fgkbfgjgdlnepjjepejabhkijcejojnf'];
-          // Add your unpacked extension ID here during development
-          // It looks like: abcdefghijklmnopqrstuvwxyzabcdef
-        ];
+    // Store locally as fallback
+    try {
+      localStorage.setItem('lowtide_pending_token', JSON.stringify({ token: access_token, email }));
+    } catch (e) {}
 
-        let sent = false;
-        for (const id of EXTENSION_IDS) {
-          try {
-            chrome.runtime.sendMessage(id, {
-              type: 'LOWTIDE_AUTH',
-              token,
-              user: { id: user.id, email: user.email, name: user.user_metadata?.full_name }
-            }, (response) => {
-              if (response?.ok) {
-                document.getElementById('spinner').style.display = 'none';
-                document.getElementById('msg').className = 'success';
-                document.getElementById('msg').textContent = '✓ Signed in. You can close this tab.';
-                setTimeout(() => window.close(), 1500);
-              }
-            });
-            sent = true;
-            break;
-          } catch(e) {}
+    // Try to send to extension
+    const sendToExtension = () => {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage(EXTENSION_ID, { type: 'LOWTIDE_TOKEN', token: access_token, email }, (response) => {
+            if (chrome.runtime.lastError) {
+              // Extension message failed — token is in localStorage as fallback
+              console.warn('Extension message failed:', chrome.runtime.lastError.message);
+            }
+            showSuccess(email);
+          });
+        } catch (e) {
+          showSuccess(email);
         }
-
-        if (!sent) {
-          // Fallback — store in localStorage so extension can poll for it
-          localStorage.setItem('lowtide_pending_token', JSON.stringify({
-            token,
-            user: { id: user.id, email: user.email, name: user.user_metadata?.full_name },
-            ts: Date.now()
-          }));
-          document.getElementById('spinner').style.display = 'none';
-          document.getElementById('msg').className = 'success';
-          document.getElementById('msg').textContent = '✓ Signed in. You can close this tab.';
-          setTimeout(() => window.close(), 1500);
-        }
-
       } else {
-        document.getElementById('spinner').style.display = 'none';
-        document.getElementById('msg').className = 'success';
-        document.getElementById('msg').textContent = '✓ Signed in. You can close this tab.';
-        setTimeout(() => window.close(), 1500);
+        // chrome.runtime not available (e.g. extension not installed)
+        showSuccess(email);
       }
-    }
+    };
 
-    handleCallback();
-  </script>
+    // Small delay to ensure page is fully ready
+    setTimeout(sendToExtension, 300);
+  }
+</script>
 </body>
 </html>
