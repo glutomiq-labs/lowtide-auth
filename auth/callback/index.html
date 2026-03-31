@@ -29,11 +29,11 @@
 <script>
   const EXTENSION_ID = 'fgkbfgjgdlnepjjepejabhkijcejojnf';
 
-  function showSuccess(email) {
+  function showSuccess(name, email) {
     document.getElementById('spinner').style.display = 'none';
     const m = document.getElementById('msg');
     m.className = 'msg success';
-    m.textContent = email ? '✓ Signed in as ' + email : '✓ Signed in successfully';
+    m.textContent = name ? '✓ Welcome, ' + name : email ? '✓ Signed in as ' + email : '✓ Signed in successfully';
     setTimeout(() => window.close(), 2000);
   }
 
@@ -44,7 +44,6 @@
     m.textContent = reason || 'Sign-in failed. Please try again.';
   }
 
-  // Parse access_token directly from URL hash — no API call needed
   const hash = window.location.hash.substring(1);
   const params = new URLSearchParams(hash);
   const access_token = params.get('access_token');
@@ -52,39 +51,29 @@
   if (!access_token) {
     showError('No token received. Please try signing in again.');
   } else {
-    // Decode JWT payload to get email without an API call
-    let email = null;
+    let email = null, name = null;
     try {
       const payload = JSON.parse(atob(access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
       email = payload.email || payload.user_metadata?.email || null;
+      name = payload.user_metadata?.full_name || payload.user_metadata?.name || null;
     } catch (e) {}
 
-    // Store locally as fallback
     try {
-      localStorage.setItem('lowtide_pending_token', JSON.stringify({ token: access_token, email }));
+      localStorage.setItem('lowtide_pending_token', JSON.stringify({ token: access_token, email, name }));
     } catch (e) {}
 
-    // Try to send to extension
     const sendToExtension = () => {
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
         try {
-          chrome.runtime.sendMessage(EXTENSION_ID, { type: 'LOWTIDE_TOKEN', token: access_token, email }, (response) => {
-            if (chrome.runtime.lastError) {
-              // Extension message failed — token is in localStorage as fallback
-              console.warn('Extension message failed:', chrome.runtime.lastError.message);
-            }
-            showSuccess(email);
+          chrome.runtime.sendMessage(EXTENSION_ID, { type: 'LOWTIDE_TOKEN', token: access_token, email, name }, (response) => {
+            if (chrome.runtime.lastError) console.warn('Extension message failed:', chrome.runtime.lastError.message);
+            showSuccess(name, email);
           });
-        } catch (e) {
-          showSuccess(email);
-        }
+        } catch (e) { showSuccess(name, email); }
       } else {
-        // chrome.runtime not available (e.g. extension not installed)
-        showSuccess(email);
+        showSuccess(name, email);
       }
     };
-
-    // Small delay to ensure page is fully ready
     setTimeout(sendToExtension, 300);
   }
 </script>
