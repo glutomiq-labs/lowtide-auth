@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lowtide — Sign In</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -14,25 +15,106 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
-    .card {
-      background: #0a1628;
-      border: 1px solid rgba(56,189,248,0.12);
-      border-radius: 20px;
-      padding: 40px 36px;
+    /* Ambient background glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(56,189,248,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -200px;
+      left: 30%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(245,158,11,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .container {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
+      padding: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    /* Top branding */
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .brand-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 12px #38bdf8; }
+    }
+    .brand-name {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+    /* Card */
+    .card {
+      background: rgba(10, 22, 40, 0.8);
+      border: 1px solid rgba(56,189,248,0.1);
+      border-radius: 24px;
+      padding: 36px 32px;
+      backdrop-filter: blur(12px);
+    }
+    .card-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
       text-align: center;
     }
-    .logo { font-size: 11px; font-weight: 800; letter-spacing: 0.2em; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
-    .pro-badge { display: inline-block; font-size: 7px; font-weight: 800; letter-spacing: 0.1em; background: linear-gradient(135deg,#f59e0b,#fbbf24); color: #030e1c; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 6px; vertical-align: middle; }
-    .title { font-size: 22px; font-weight: 800; color: #e2e8f0; margin-bottom: 8px; letter-spacing: -0.02em; }
-    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 32px; line-height: 1.5; }
+    .card-subtitle {
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 28px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    /* Stats strip */
+    .stats-strip {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 28px;
+      padding: 14px;
+      background: rgba(56,189,248,0.03);
+      border: 1px solid rgba(56,189,248,0.07);
+      border-radius: 12px;
+    }
+    .stat { text-align: center; }
+    .stat-val { font-size: 16px; font-weight: 800; color: #38bdf8; letter-spacing: -0.02em; }
+    .stat-label { font-size: 9px; color: #334155; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+    /* Buttons */
     .btn-google {
       width: 100%;
       padding: 13px;
-      border-radius: 10px;
-      border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 12px;
+      border: 1px solid rgba(56,189,248,0.15);
       background: rgba(56,189,248,0.04);
       color: #caf0f8;
       font-size: 13px;
@@ -46,15 +128,29 @@
       font-family: inherit;
       margin-bottom: 16px;
     }
-    .btn-google:hover { background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.4); }
-    .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(56,189,248,0.08); }
-    .divider span { font-size: 11px; color: #334155; }
+    .btn-google:hover {
+      background: rgba(56,189,248,0.08);
+      border-color: rgba(56,189,248,0.35);
+      transform: translateY(-1px);
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(56,189,248,0.07);
+    }
+    .divider span { font-size: 11px; color: #1e293b; }
     input {
       width: 100%;
       padding: 12px 14px;
       border-radius: 10px;
-      border: 1px solid rgba(56,189,248,0.12);
+      border: 1px solid rgba(56,189,248,0.1);
       background: rgba(56,189,248,0.03);
       color: #caf0f8;
       font-size: 13px;
@@ -63,12 +159,12 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    input:focus { border-color: rgba(56,189,248,0.4); }
-    input::placeholder { color: #334155; }
+    input:focus { border-color: rgba(56,189,248,0.4); background: rgba(56,189,248,0.05); }
+    input::placeholder { color: #1e293b; }
     .btn-email {
       width: 100%;
       padding: 13px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: none;
       background: #38bdf8;
       color: #030e1c;
@@ -79,32 +175,93 @@
       transition: all 0.2s;
       margin-bottom: 16px;
     }
-    .btn-email:hover { background: #7dd3fc; }
-    .btn-email:disabled { opacity: 0.5; cursor: wait; }
-    .status { font-size: 12px; color: #64748b; min-height: 20px; }
+    .btn-email:hover { background: #7dd3fc; transform: translateY(-1px); }
+    .btn-email:disabled { opacity: 0.5; cursor: wait; transform: none; }
+    .status { font-size: 12px; color: #64748b; min-height: 20px; text-align: center; }
     .status.success { color: #10b981; }
     .status.error { color: #ef4444; }
-    .footer { margin-top: 24px; font-size: 11px; color: #334155; }
+    /* Footer */
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 11px;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+    .footer a { color: #334155; text-decoration: underline; }
+    /* Feature pills */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .feature-pill {
+      font-size: 10px;
+      color: #475569;
+      background: rgba(56,189,248,0.04);
+      border: 1px solid rgba(56,189,248,0.08);
+      border-radius: 20px;
+      padding: 4px 10px;
+      letter-spacing: 0.03em;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">Lowtide <span class="pro-badge">PRO</span></div>
-    <div class="title">Welcome back</div>
-    <div class="subtitle">Sign in to sync your recipes,<br/>One-Shot credits, and settings.</div>
+  <div class="container">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span class="brand-name">Lowtide</span>
+    </div>
 
-    <button class="btn-google" id="btn-google">
-      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-      Continue with Google
-    </button>
+    <div class="card">
+      <div class="card-title">Sign in</div>
+      <div class="card-subtitle">Track your AI water and energy usage.<br/>Your data syncs across all your devices.</div>
 
-    <div class="divider"><span>or use email</span></div>
+      <div class="stats-strip">
+        <div class="stat">
+          <div class="stat-val">2.4L</div>
+          <div class="stat-label">Avg saved / week</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">10×</div>
+          <div class="stat-label">Better prompts</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">0.003g</div>
+          <div class="stat-label">CO₂ per One-Shot</div>
+        </div>
+      </div>
 
-    <input type="email" id="email-input" placeholder="your@email.com" />
-    <button class="btn-email" id="btn-email">Send Magic Link</button>
-    <div class="status" id="status"></div>
+      <div class="features">
+        <span class="feature-pill">✦ One-Shot Mode</span>
+        <span class="feature-pill">📊 Usage Dashboard</span>
+        <span class="feature-pill">🎛 Saved Recipes</span>
+        <span class="feature-pill">🌊 Water Tracking</span>
+      </div>
 
-    <div class="footer">By signing in you agree to Lowtide's terms of service.</div>
+      <button class="btn-google" id="btn-google">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider"><span>or sign in with email</span></div>
+
+      <input type="email" id="email-input" placeholder="your@email.com" />
+      <button class="btn-email" id="btn-email">Send Magic Link</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="footer">
+      By signing in you agree to Lowtide's terms of service.<br/>
+      Your prompts are never stored or shared.
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -113,7 +270,6 @@
     const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const REDIRECT = 'https://lowtide-auth.vercel.app/auth/callback';
 
     document.getElementById('btn-google').onclick = async () => {
@@ -139,7 +295,7 @@
         btn.disabled = false;
         btn.textContent = 'Send Magic Link';
       } else {
-        showStatus('Check your email for the magic link ✓', 'success');
+        showStatus('✓ Check your email for the magic link', 'success');
         btn.textContent = 'Email sent';
       }
     };
@@ -147,7 +303,7 @@
     function showStatus(msg, type) {
       const el = document.getElementById('status');
       el.textContent = msg;
-      el.className = 'status ' + type;
+      el.className = 'status ' + (type || '');
     }
   </script>
 </body>
