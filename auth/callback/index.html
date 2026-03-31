@@ -38,7 +38,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://lnejnktkjspamwgkhzjl.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxuZWpua3RranNwYW13Z2toempsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODU3MTAsImV4cCI6MjA4ODk2MTcxMH0.xOvkrjbdCEaIYbBNpfd3mhJSrD5WB-aDDW93jAEPx2s';
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -59,7 +59,7 @@
       // Send token to extension
       if (typeof chrome !== 'undefined' && chrome.runtime) {
         // Try all known extension IDs — update this when you have your Chrome Web Store ID
-        const EXTENSION_IDS = [
+        const EXTENSION_IDS = ['fgkbfgjgdlnepjjepejabhkijcejojnf'];
           // Add your unpacked extension ID here during development
           // It looks like: abcdefghijklmnopqrstuvwxyzabcdef
         ];
